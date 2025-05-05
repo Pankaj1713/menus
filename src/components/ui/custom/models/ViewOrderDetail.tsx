@@ -1,22 +1,22 @@
-import React from 'react'
-import { CustomModel } from './CustomModel'
+import React from "react";
+import { CustomModel } from "./CustomModel";
 
 interface OrderItem {
-  name: string
-  quantity: number
-  price: number
+  name: string;
+  quantity: number;
+  price: number;
 }
 
 interface OrderDetailsProps {
-  orderId: string
-  orderDate: string
-  items: OrderItem[]
-  itemTotal: number
-  taxes: number
-  grandTotal: number
-  status: string
-  open?: boolean
-  onClose?: () => void
+  orderId: string;
+  orderDate: string;
+  items: OrderItem[];
+  itemTotal: number;
+  taxes: number;
+  grandTotal: number;
+  status: string;
+  open?: boolean;
+  onClose?: () => void;
 }
 
 export default function ViewOrderDetail({
@@ -28,7 +28,7 @@ export default function ViewOrderDetail({
   grandTotal,
   status,
   open,
-  onClose
+  onClose,
 }: OrderDetailsProps) {
   return (
     <CustomModel
@@ -40,7 +40,7 @@ export default function ViewOrderDetail({
       <div className="space-y-4 lg:p-2 md:p-2 p-3 !h-fit">
         {/* Status Badge */}
         <div className="flex justify-between border-b pb-3 border-dashed border-black/70 items-center">
-            <p className='text-lg font-semibold'>Order Details</p>
+          <p className="text-lg font-semibold">Order Detailsasdasd</p>
           <span className="px-3 py-1 text-sm text-white bg-green-500 rounded-full">
             #{status}
           </span>
@@ -78,10 +78,12 @@ export default function ViewOrderDetail({
           </div>
           <div className="flex justify-between pt-2 border-t border-black/50">
             <span className="text-lg font-semibold">Grand Total</span>
-            <span className="text-lg font-semibold">${grandTotal.toFixed(2)}</span>
+            <span className="text-lg font-semibold">
+              ${grandTotal.toFixed(2)}
+            </span>
           </div>
         </div>
       </div>
     </CustomModel>
-  )
+  );
 }

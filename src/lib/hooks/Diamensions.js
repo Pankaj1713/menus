@@ -8,7 +8,7 @@ export const isDesktop = () => {
 export const isMobile = () => {
   const isMobile = useMediaQuery({ maxWidth: 768 });
   return isMobile;
-};  
+};
 
 export const isTablet = () => {
   const isTablet = useMediaQuery({ minWidth: 768, maxWidth: 1024 });

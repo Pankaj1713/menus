@@ -61,18 +61,18 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
-body{
-  font-family: 'Lato', sans-serif;
+body {
+  font-family: "Lato", sans-serif;
 }
-.card-shadow{
+.card-shadow {
   box-shadow: rgba(116, 37, 58, 0.09) 0px 10px 42px;
 }
-.card_shadow_2{
+.card_shadow_2 {
   box-shadow: rgba(250, 129, 183, 0.781) 0px 10px 42px;
 }
 
-.wrapper{
-  @apply  lg:w-[85%] md:w-[90%] w-[90%] mx-auto ;
+.wrapper {
+  @apply lg:w-[85%] md:w-[90%] w-[90%] mx-auto;
 }
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -91,27 +91,83 @@ body{
     @apply bg-background text-foreground;
   }
 }
-.input_search{
+.input_search {
   outline: none;
   border: none;
 }
-.input_search:focus{
+.input_search:focus {
   outline: none;
   border: none;
 }
-.input_search:active{
+.input_search:active {
   outline: none;
   border: none;
 }
-.input_search:focus{
+.input_search:focus {
   outline: none;
   border: none;
 }
-.input_search:out-of-range{
+.input_search:out-of-range {
   outline: none;
   border: none;
 }
-.input_search:active{
+.input_search:active {
   outline: none;
   border: none;
+}
+
+.small_spinner_container {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+}
+
+.small_spinner {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 10;
+  stroke-dasharray: 2, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
+}
+
+@keyframes rotate4 {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash4 {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 90, 200;
+    stroke-dashoffset: -35px;
+  }
+
+  100% {
+    stroke-dashoffset: -125px;
+  }
+}
+
+.spinner {
+  width: 3.25em;
+  transform-origin: center;
+  animation: rotate4 2s linear infinite;
+}
+
+.circle {
+  fill: none;
+  stroke: hsl(214, 97%, 59%);
+  stroke-width: 2;
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  stroke-linecap: round;
+  animation: dash4 1.5s ease-in-out infinite;
 }
