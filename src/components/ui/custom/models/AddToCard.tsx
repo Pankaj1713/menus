@@ -57,6 +57,8 @@ const AddToCard = () => {
     itemsData();
   }, [id]);
 
+  console.log({ data });
+
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
     setCurrentImageIndex((prevIndex) => {
@@ -67,25 +69,6 @@ const AddToCard = () => {
     });
   };
 
-  const addOns: AddOn[] = [
-    { name: "Lettuce", price: 20, isVeg: true },
-    { name: "Onions", price: 20, isVeg: true },
-    { name: "Olives", price: 20, isVeg: true },
-    { name: "Becan", price: 20, isVeg: false },
-  ];
-
-  const beverages: AddOn[] = [
-    { name: "Coke (250ml)", price: 20 },
-    { name: "Pepsi (350ml)", price: 20 },
-    { name: "Fanta", price: 20 },
-    { name: "Pepsi", price: 20 },
-  ];
-  const sides: AddOn[] = [
-    { name: "Veggie Strips", price: 20 },
-    { name: "4pcs Chrunchy Chiken Nuggets", price: 20 },
-    { name: "Fiery Hell Dip", price: 20 },
-    { name: "4pcs Chrunchy Chiken Nuggets", price: 20 },
-  ];
   const productImages = [
     ImageProvider()?.src,
     ImageProvider()?.src,
@@ -331,7 +314,7 @@ const AddToCard = () => {
               alt="Product"
               className="w-10 h-10 rounded-md object-cover"
             />
-            <h3 className="text-base font-semibold">Grilled Chicken Burger</h3>
+            <h3 className="text-base font-semibold">{data?.name}</h3>
             <div className=" absolute top-1/2 -translate-y-1/2 right-3 hover:scale-110 transition-all duration-300 rotate-45 ">
               <Plus size={23} className="text-black" />
             </div>
@@ -345,7 +328,7 @@ const AddToCard = () => {
               <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
                 Add-ons
               </h5>
-              {addOns.map((addon) => (
+              {data?.addOns?.map((addon) => (
                 <div
                   key={addon.name}
                   className="flex  items-center justify-between py-2"
@@ -353,12 +336,16 @@ const AddToCard = () => {
                   <div className="flex items-center gap-2">
                     <div
                       className={`border-2 p-[2px] ${
-                        addon.isVeg ? "border-green-500" : "border-red-500"
+                        addon.category === "veg"
+                          ? "border-green-500"
+                          : "border-red-500"
                       }`}
                     >
                       <Circle
                         className={`w-2 h-2 ${
-                          addon.isVeg ? "fill-green-500" : "fill-red-500"
+                          addon.category === "veg"
+                            ? "fill-green-500"
+                            : "fill-red-500"
                         }`}
                       />
                     </div>
@@ -379,7 +366,7 @@ const AddToCard = () => {
               <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
                 Add Beverages
               </h5>
-              {beverages.map((beverage) => (
+              {data?.addBeverages?.map((beverage) => (
                 <div
                   key={beverage.name}
                   className="flex items-center justify-between py-2"
@@ -405,7 +392,7 @@ const AddToCard = () => {
               <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
                 Choose your Sides
               </h5>
-              {sides.map((side) => (
+              {data?.chooseYourSides?.map((side) => (
                 <div
                   key={side.name}
                   className="flex items-center justify-between py-2"

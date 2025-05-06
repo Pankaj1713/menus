@@ -214,7 +214,7 @@ const Header = () => {
                                 </Link>
 
                                 <button
-                                    onClick={() => router.push("/my-orders")}
+                                      onClick={() => router.push("/my-cart")}
                                     className={cn("font-semibold", {
                                         'bg-opacity-90 hover:bg-transparent px-0 py-0 hover:bg-opacity-100': !isScrolled
                                     })}

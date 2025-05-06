@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import AnimateEachElement from "@/components/ui/custom/animations/AnimateEachElement";
 import ViewOrderDetail from "@/components/ui/custom/models/ViewOrderDetail";
@@ -11,7 +10,6 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [orderData, setOrderData] = useState<any>({});
 
   useEffect(() => {
     fetchOrders();
@@ -20,48 +18,12 @@ export default function OrdersPage() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Replace with your actual API endpoint
-      // const response = await fetch('/api/orders')
-      // const data = await response.json()
-
-      let data = [
-        {
-          orderId: "#56567253782653",
-          date: "14:42 PM, 02 Oct, 2024",
-          amount: "$15.65",
-          items: "Grilled Pizza, Maxico Pasta, French Fries, Pepsi",
-          status: "completed",
-        },
-        {
-          orderId: "#56567253782653",
-          date: "14:42 PM, 02 Oct, 2024",
-          amount: "$15.65",
-          items: "Grilled Pizza, Maxico Pasta, French Fries, Pepsi",
-          status: "active",
-        },
-        {
-          orderId: "#56567253782653",
-          date: "14:42 PM, 02 Oct, 2024",
-          amount: "$15.65",
-          items: "Grilled Pizza, Maxico Pasta, French Fries, Pepsi",
-          status: "cancelled",
-        },
-        {
-          orderId: "#56567253782653",
-          date: "14:42 PM, 02 Oct, 2024",
-          amount: "$15.65",
-          items: "Grilled Pizza, Maxico Pasta, French Fries, Pepsi",
-          status: "completed",
-        },
-      ];
-      setTimeout(() => {
-        setOrders(data);
-        setLoading(false);
-      }, 1000);
+      const res = await getApi(`${APIS.GET_ORDER}?deviceId=1`);
+      setOrders(res?.data);
     } catch (error) {
       console.error("Error fetching orders:", error);
-      setOrders([]);
     } finally {
+      setLoading(false);
     }
   };
 
@@ -81,26 +43,12 @@ export default function OrdersPage() {
       );
     };
 
-    useEffect(() => {
-      const ordersData = async () => {
-        try {
-          const res = await getApi(`${APIS.GET_ORDER}?deviceId=1`);
-          setOrderData(res?.data);
-        } catch (error) {
-          console.error({ error });
-        }
-      };
-      ordersData();
-    }, []);
-
-    console.log({ orderData });
-
     return (
       <div
         onClick={() => setOpen(true)}
         className="bg-white cursor-pointer card-shadow rounded-xl p-4 space-y-2"
       >
-        <div className="flex border-b border-gray-900 pb-2 border-dashed   justify-between items-center">
+        <div className="flex border-b border-gray-900 pb-2 border-dashed justify-between items-center">
           <div className="space-y-2">
             <p className="lg:text-lg text-md font-semibold">
               Order ID: {orderId}
@@ -108,16 +56,14 @@ export default function OrdersPage() {
           </div>
           {getStatusBadge()}
         </div>
-        <div className="">
+        <div>
           <p className="lg:text-sm text-sm text-gray-500">
-            Order Placed : {date}
+            Order Placed: {date}
           </p>
         </div>
         <div className="flex justify-between flex-col items-start">
-          <p className="lg:text-lg text-md font-bold text-appColor  ">
-            {amount}
-          </p>
-          <p className="lg:text-md text-sm font-semibold   ">{items}</p>
+          <p className="lg:text-lg text-md font-bold text-appColor">{amount}</p>
+          <p className="lg:text-md text-sm font-semibold">{items}</p>
         </div>
       </div>
     );
@@ -149,6 +95,7 @@ export default function OrdersPage() {
       </div>
     );
   }
+
   return (
     <div className="wrapper lg:mt-40 mt-28 lg:!mt-34 min-h-[80vh] lg:mb-20 md:mb-10 mb-5 lg:w-[60%] mx-auto space-y-6">
       {orders.length === 0 ? (
@@ -162,12 +109,12 @@ export default function OrdersPage() {
         <AnimateEachElement className="space-y-4">
           {orders.map((order, index) => (
             <OrderItem
-              key={order.id || index}
-              orderId={order.orderId}
-              date={order.date}
-              amount={order.amount}
-              items={order.items}
-              status={order.status}
+              key={order._id || index}
+              orderId={order.orderNumber || "N/A"}
+              date={new Date(order.createdAt).toLocaleString()}
+              amount={`$${order.PaymentSummary.totalPrice}`}
+              items={order.items.map((item: any) => item.name).join(", ")}
+              status={order.status.toLowerCase()}
             />
           ))}
         </AnimateEachElement>
