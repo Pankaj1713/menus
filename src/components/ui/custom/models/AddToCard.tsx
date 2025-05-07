@@ -16,9 +16,11 @@ import { Plus, Minus, Circle, ChevronLeft, ShoppingCart } from "lucide-react";
 import { isDesktop, isMobile } from "@/lib/hooks/Diamensions";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Separator } from "@radix-ui/react-separator";
-import { getApi } from "@/api/apiService";
+import { getApi, postApi, putApi } from "@/api/apiService";
 import { APIS } from "@/api/endpoints";
 import Spinner from "@/components/common/spinner";
+import { Formik, Form } from "formik";
+import * as Yup from "yup";
 interface AddOn {
   name: string;
   price: number;
@@ -57,8 +59,6 @@ const AddToCard = () => {
     itemsData();
   }, [id]);
 
-  console.log({ data });
-
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
     setCurrentImageIndex((prevIndex) => {
@@ -77,6 +77,61 @@ const AddToCard = () => {
   const increaseQuantity = () => setQuantity((prev) => prev + 1);
   const decreaseQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const handleAddToCart = async (data) => {
+    const params = {
+      tableNumber: "2",
+      itemId: data?._id,
+      image: data?.image,
+      name: data?.name,
+      category: data?.category,
+      price: data?.price,
+      description: data?.description,
+      quantity: quantity,
+      // addOns: data?.addOns || [],
+      // addBeverages: data?.addBeverages || [],
+      // chooseYourSides: data?.chooseYourSides || [],
+    };
+
+    try {
+      dispatch(setIsAddToCart(false));
+      dispatch(setIsCustomize(false));
+      const res = await postApi(APIS.CART_DATA, params);
+    } catch (error) {
+      console.error({ error });
+    }
+  };
+
+  const handleUpdateItem = async (values) => {
+    const params = {
+      tableNumber: "2",
+      itemId: data?._id,
+      image: data?.image,
+      name: data?.name,
+      category: data?.category,
+      price: data?.price,
+      description: data?.description,
+      quantity: quantity,
+      addOns: values.addOns,
+      addBeverages: values.addBeverages,
+      chooseYourSides: values.chooseYourSides,
+      // addOns: data?.addOns || [],
+      // addBeverages: data?.addBeverages || [],
+      // chooseYourSides: data?.chooseYourSides || [],
+    };
+    console.log({ params });
+
+    try {
+      const res = await putApi(APIS.EDIT_CART, params);
+      console.log({ res });
+    } catch (error) {}
+  };
+
+  const initialValues = {
+    addOns: [],
+    addBeverages: [],
+    chooseYourSides: [],
+  };
 
   return (
     <div>
@@ -218,14 +273,7 @@ const AddToCard = () => {
                 <Button className="w-full h-12 rounded-full bg-appColor hover:bg-appColor/90 text-white">
                   <ShoppingCart className="!w-6  !h-6" /> Add to Cart
                 </Button>
-                <Button
-                  variant="outline"
-                  className="w-full h-12 rounded-full"
-                  onClick={() => {
-                    dispatch(setIsCustomize(true));
-                    dispatch(setIsAddToCart(false));
-                  }}
-                >
+                <Button variant="outline" className="w-full h-12 rounded-full">
                   Customisable
                 </Button>
               </div>
@@ -253,7 +301,12 @@ const AddToCard = () => {
                     </span>
                   </div>
                   <div className=" flex gap-2 ">
-                    <Button className=" w-fit ">Add to Cart</Button>
+                    <Button
+                      className=" w-fit"
+                      onClick={() => handleAddToCart(data)}
+                    >
+                      Add to Cart
+                    </Button>
                     <Button
                       onClick={() => {
                         dispatch(setIsAddToCart(false));
@@ -305,134 +358,233 @@ const AddToCard = () => {
         }}
         title=""
         trigger={<Button variant="outline">Customize</Button>}
-        contentClassName=" bg-gray-50    rounded-t-xl"
+        contentClassName="bg-gray-50 rounded-t-xl"
       >
-        <div className=" ">
-          <div className="flex relative bg-white rounded-2xl card-shadow  items-center gap-2 p-4 ">
-            <img
-              src={data?.image}
-              alt="Product"
-              className="w-10 h-10 rounded-md object-cover"
-            />
-            <h3 className="text-base font-semibold">{data?.name}</h3>
-            <div className=" absolute top-1/2 -translate-y-1/2 right-3 hover:scale-110 transition-all duration-300 rotate-45 ">
-              <Plus size={23} className="text-black" />
-            </div>
-          </div>
-          <div className=" mt-4 pb-5 space-y-4">
-            <h4 className="text-base font-medium">
-              Customise as per your taste
-            </h4>
+        <Formik
+          enableReinitialize
+          initialValues={{
+            addOns: [],
+            addBeverages: [],
+            chooseYourSides: [],
+          }}
+          onSubmit={handleUpdateItem}
+        >
+          {({ values, setFieldValue, handleSubmit }) => {
+            return (
+              <Form>
+                <div className="flex relative bg-white rounded-2xl card-shadow items-center gap-2 p-4">
+                  <img
+                    src={data?.image}
+                    alt="Product"
+                    className="w-10 h-10 rounded-md object-cover"
+                  />
+                  <h3 className="text-base font-semibold">{data?.name}</h3>
+                  {/* <div className="absolute top-1/2 -translate-y-1/2 right-3 hover:scale-110 transition-all duration-300 rotate-45">
+                    <Plus size={23} className="text-black" />
+                  </div> */}
+                </div>
 
-            <div className="bg-white rounded-xl card-shadow p-4 ">
-              <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
-                Add-ons
-              </h5>
-              {data?.addOns?.map((addon) => (
-                <div
-                  key={addon.name}
-                  className="flex  items-center justify-between py-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`border-2 p-[2px] ${
-                        addon.category === "veg"
-                          ? "border-green-500"
-                          : "border-red-500"
-                      }`}
+                <div className="mt-4 pb-5 space-y-4">
+                  <h4 className="text-base font-medium">
+                    Customise as per your taste
+                  </h4>
+
+                  {/* ADD-ONS */}
+                  <div className="bg-white rounded-xl card-shadow p-4">
+                    <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
+                      Add-ons
+                    </h5>
+                    {data?.addOns?.map((addon, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`border-2 p-[2px] ${
+                              addon.category === "veg"
+                                ? "border-green-500"
+                                : "border-red-500"
+                            }`}
+                          >
+                            <Circle
+                              className={`w-2 h-2 ${
+                                addon.category === "veg"
+                                  ? "fill-green-500"
+                                  : "fill-red-500"
+                              }`}
+                            />
+                          </div>
+                          <span className="text-sm">{addon.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm">+${addon.price}</span>
+                          {/* <Checkbox
+                          checked={values.addOns.includes(addon.name)}
+                          onCheckedChange={(checked) => {
+                            const updated = checked
+                              ? [...values.addOns, addon.name]
+                              : values.addOns.filter(
+                                  (item) => item !== addon.name
+                                );
+                            setFieldValue("addOns", updated);
+                          }}
+                          className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
+                        /> */}
+                          <Checkbox
+                            checked={values.addOns.some(
+                              (item) => item._id === addon._id && item.isSelect
+                            )}
+                            onCheckedChange={(checked) => {
+                              setFieldValue(
+                                "addOns",
+                                checked
+                                  ? [
+                                      ...values.addOns,
+                                      { ...addon, isSelect: true },
+                                    ] // Add to the array and mark as selected
+                                  : values.addOns.filter(
+                                      (item) => item._id !== addon._id
+                                    ) // Remove from the array
+                              );
+                            }}
+                            className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* BEVERAGES */}
+                  <div className="bg-white rounded-xl card-shadow p-4">
+                    <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
+                      Add Beverages
+                    </h5>
+                    {data?.addBeverages?.map((bev, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="border-2 border-green-500 p-[2px]">
+                            <Circle className="w-2 h-2 fill-green-500" />
+                          </div>
+                          <span className="text-sm">{bev.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm">+${bev.price}</span>
+                          <Checkbox
+                            checked={values.addBeverages.some(
+                              (item) => item._id === bev._id && item.isSelect
+                            )}
+                            onCheckedChange={(checked) => {
+                              const isChecked = checked === true;
+
+                              const updatedBeverages = isChecked
+                                ? [
+                                    ...values.addBeverages.filter(
+                                      (item) => item._id !== bev._id
+                                    ),
+                                    { ...bev, isSelect: true },
+                                  ]
+                                : values.addBeverages.map((item) =>
+                                    item._id === bev._id
+                                      ? { ...item, isSelect: false }
+                                      : item
+                                  );
+
+                              setFieldValue("addBeverages", updatedBeverages);
+                            }}
+                            className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* SIDES */}
+                  <div className="bg-white rounded-xl card-shadow p-4">
+                    <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
+                      Choose your Sides
+                    </h5>
+                    {data?.chooseYourSides?.map((side, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between py-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <div className="border-2 border-red-500 p-[2px]">
+                            <Circle className="w-2 h-2 fill-red-500" />
+                          </div>
+                          <span className="text-sm">{side.name}</span>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm">+${side.price}</span>
+                          <Checkbox
+                            checked={values.chooseYourSides.some(
+                              (item) => item._id === side._id && item.isSelect
+                            )}
+                            onCheckedChange={(checked) => {
+                              const isChecked = checked === true;
+
+                              const updatedSides = isChecked
+                                ? [
+                                    ...values.chooseYourSides.filter(
+                                      (item) => item._id !== side._id
+                                    ),
+                                    { ...side, isSelect: true },
+                                  ]
+                                : values.chooseYourSides.map((item) =>
+                                    item._id === side._id
+                                      ? { ...item, isSelect: false }
+                                      : item
+                                  );
+
+                              setFieldValue("chooseYourSides", updatedSides);
+                            }}
+                            className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Quantity and Submit */}
+                  <div className="sticky flex gap-4 bottom-0 left-0 right-0 p-4 bg-white rounded-xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3 border-appColor border-[1.5px] bg-rose-50 rounded-lg py-1 px-2">
+                        <button
+                          onClick={decreaseQuantity}
+                          type="button"
+                          className="p-1"
+                        >
+                          <Minus size={16} className="text-black" />
+                        </button>
+                        <span className="text-base min-w-8 text-center">
+                          {quantity}
+                        </span>
+                        <button
+                          onClick={increaseQuantity}
+                          type="button"
+                          className="p-1"
+                        >
+                          <Plus size={16} className="text-black" />
+                        </button>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      className="w-full rounded-full bg-appColor hover:bg-appColor/90 text-white"
+                      onClick={handleSubmit}
                     >
-                      <Circle
-                        className={`w-2 h-2 ${
-                          addon.category === "veg"
-                            ? "fill-green-500"
-                            : "fill-red-500"
-                        }`}
-                      />
-                    </div>
-                    <span className="text-sm">{addon.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm">+${addon.price}</span>
-                    <Checkbox
-                      id={addon.name}
-                      className="border-2 border-gray-300 data-[state=checked]:bg-appColor   data-[state=checked]:border-appColor"
-                    />
+                      Update Item
+                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="bg-white rounded-xl card-shadow p-4 ">
-              <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
-                Add Beverages
-              </h5>
-              {data?.addBeverages?.map((beverage) => (
-                <div
-                  key={beverage.name}
-                  className="flex items-center justify-between py-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="border-2 border-green-500 p-[2px]">
-                      <Circle className="w-2 h-2 fill-green-500" />
-                    </div>
-                    <span className="text-sm">{beverage.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm">+${beverage.price}</span>
-                    <Checkbox
-                      id={beverage.name}
-                      className="border-2 border-gray-300 data-[state=checked]:bg-appColor   data-[state=checked]:border-appColor"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-white rounded-xl card-shadow p-4 ">
-              <h5 className="text-sm font-semibold w-full border-b pb-2 mb-2">
-                Choose your Sides
-              </h5>
-              {data?.chooseYourSides?.map((side) => (
-                <div
-                  key={side.name}
-                  className="flex items-center justify-between py-2"
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="border-2 border-red-500 p-[2px]">
-                      <Circle className="w-2 h-2 fill-red-500" />
-                    </div>
-                    <span className="text-sm">{side.name}</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm">+${side.price}</span>
-                    <Checkbox
-                      id={side.name}
-                      className="border-2 border-gray-300 data-[state=checked]:bg-appColor   data-[state=checked]:border-appColor"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className=" sticky  flex gap-4 bottom-0 left-0 right-0 p-4 bg-white rounded-xl ">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3 border-appColor border-[1.5px] bg-rose-50 rounded-lg py-1 px-2">
-                  <button onClick={decreaseQuantity} className="p-1">
-                    <Minus size={16} className="text-black" />
-                  </button>
-                  <span className="text-base min-w-8 text-center">
-                    {quantity}
-                  </span>
-                  <button onClick={increaseQuantity} className="p-1">
-                    <Plus size={16} className="text-black" />
-                  </button>
-                </div>
-              </div>
-              <Button className="w-full rounded-full bg-appColor hover:bg-appColor/90 text-white">
-                Update item
-              </Button>
-            </div>
-          </div>
-        </div>
+              </Form>
+            );
+          }}
+        </Formik>
       </CustomModel>
     </div>
   );

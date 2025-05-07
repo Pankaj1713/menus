@@ -3,5 +3,6 @@ export const APIS = {
   GET_ANNOUNCEMENTS: "app/announcement",
   ITEMS_DATA: "app/item",
   GET_ORDER: "app/order",
-  CART_DATA:"app/cart"
+  CART_DATA: "app/cart",
+  EDIT_CART: "app/cart",
 };
