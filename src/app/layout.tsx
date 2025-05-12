@@ -4,6 +4,7 @@ import "./globals.css";
 import NavBar from "@/components/ui/custom/pages/common/NavBar";
 import Footer from "@/components/ui/custom/pages/common/Footer";
 import LayoutWrapper from "@/components/ui/custom/layouts/LayoutWrapper";
+import { Toaster } from "sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,12 +29,16 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="/quick-menu-logo.png" />
-        <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet"/>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap"
+          rel="stylesheet"
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LayoutWrapper>
+          <Toaster position="bottom-right" />
           <NavBar />
           {children}
           <Footer />

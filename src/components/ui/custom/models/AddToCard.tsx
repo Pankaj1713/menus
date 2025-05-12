@@ -16,15 +16,20 @@ import { Plus, Minus, Circle, ChevronLeft, ShoppingCart } from "lucide-react";
 import { isDesktop, isMobile } from "@/lib/hooks/Diamensions";
 import { motion, AnimatePresence, PanInfo } from "framer-motion";
 import { Separator } from "@radix-ui/react-separator";
-import { getApi, postApi, putApi } from "@/api/apiService";
+import { getApi, postApi } from "@/api/apiService";
 import { APIS } from "@/api/endpoints";
 import Spinner from "@/components/common/spinner";
 import { Formik, Form } from "formik";
-import * as Yup from "yup";
-interface AddOn {
-  name: string;
-  price: number;
-  isVeg?: boolean;
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+function getDeviceId() {
+  let deviceId = localStorage.getItem("device_id");
+  if (!deviceId) {
+    deviceId = crypto.randomUUID();
+    localStorage.setItem("device_id", deviceId);
+  }
+  return deviceId;
 }
 
 const AddToCard = () => {
@@ -40,8 +45,10 @@ const AddToCard = () => {
     return Math.abs(offset) * velocity;
   };
   const [loading, setLoading] = useState(true);
+  const [deviceId, setDeviceId] = useState("");
 
   const id = modelsOpen?.modalId;
+  const router = useRouter();
 
   useEffect(() => {
     setLoading(true);
@@ -58,6 +65,11 @@ const AddToCard = () => {
     };
     itemsData();
   }, [id]);
+
+  useEffect(() => {
+    const id = getDeviceId();
+    setDeviceId(id);
+  }, []);
 
   const paginate = (newDirection: number) => {
     setDirection(newDirection);
@@ -88,9 +100,9 @@ const AddToCard = () => {
       price: data?.price,
       description: data?.description,
       quantity: quantity,
-      // addOns: data?.addOns || [],
-      // addBeverages: data?.addBeverages || [],
-      // chooseYourSides: data?.chooseYourSides || [],
+      addOns: values.addOns.map(({ _id, ...rest }) => rest),
+      addBeverages: values.addBeverages.map(({ _id, ...rest }) => rest),
+      chooseYourSides: values.chooseYourSides.map(({ _id, ...rest }) => rest),
     };
 
     try {
@@ -103,28 +115,44 @@ const AddToCard = () => {
   };
 
   const handleUpdateItem = async (values) => {
-    const params = {
-      tableNumber: "2",
+    if (
+      values.addOns?.length === 0 &&
+      values.addBeverages?.length === 0 &&
+      values.chooseYourSides?.length === 0
+    ) {
+      toast.error("Please select required items");
+      return;
+    }
+
+    const item = {
       itemId: data?._id,
       image: data?.image,
       name: data?.name,
       category: data?.category,
       price: data?.price,
-      description: data?.description,
+      addOns: values.addOns.map(({ _id, ...rest }) => rest),
+      addBeverages: values.addBeverages.map(({ _id, ...rest }) => rest),
+      chooseYourSides: values.chooseYourSides.map(({ _id, ...rest }) => rest),
       quantity: quantity,
-      addOns: values.addOns,
-      addBeverages: values.addBeverages,
-      chooseYourSides: values.chooseYourSides,
-      // addOns: data?.addOns || [],
-      // addBeverages: data?.addBeverages || [],
-      // chooseYourSides: data?.chooseYourSides || [],
     };
-    console.log({ params });
+
+    const payload = {
+      tableNumber: "2",
+      items: [item],
+      addCookingRequest: "",
+      deviceId: deviceId,
+    };
 
     try {
-      const res = await putApi(APIS.EDIT_CART, params);
-      console.log({ res });
-    } catch (error) {}
+      const res = await postApi(APIS.EDIT_CART, payload);
+      if (res?.statusCode === 200) {
+        toast.success("Item added to cart");
+        dispatch(setIsCustomize(false));
+        router.push("/my-cart");
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.data || "Something went wrong");
+    }
   };
 
   const initialValues = {
@@ -362,14 +390,10 @@ const AddToCard = () => {
       >
         <Formik
           enableReinitialize
-          initialValues={{
-            addOns: [],
-            addBeverages: [],
-            chooseYourSides: [],
-          }}
+          initialValues={initialValues}
           onSubmit={handleUpdateItem}
         >
-          {({ values, setFieldValue, handleSubmit }) => {
+          {({ values, setFieldValue }) => {
             return (
               <Form>
                 <div className="flex relative bg-white rounded-2xl card-shadow items-center gap-2 p-4">
@@ -419,18 +443,6 @@ const AddToCard = () => {
                         </div>
                         <div className="flex items-center gap-3">
                           <span className="text-sm">+${addon.price}</span>
-                          {/* <Checkbox
-                          checked={values.addOns.includes(addon.name)}
-                          onCheckedChange={(checked) => {
-                            const updated = checked
-                              ? [...values.addOns, addon.name]
-                              : values.addOns.filter(
-                                  (item) => item !== addon.name
-                                );
-                            setFieldValue("addOns", updated);
-                          }}
-                          className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
-                        /> */}
                           <Checkbox
                             checked={values.addOns.some(
                               (item) => item._id === addon._id && item.isSelect
@@ -442,10 +454,10 @@ const AddToCard = () => {
                                   ? [
                                       ...values.addOns,
                                       { ...addon, isSelect: true },
-                                    ] // Add to the array and mark as selected
+                                    ]
                                   : values.addOns.filter(
                                       (item) => item._id !== addon._id
-                                    ) // Remove from the array
+                                    )
                               );
                             }}
                             className="border-2 border-gray-300 data-[state=checked]:bg-appColor data-[state=checked]:border-appColor"
@@ -573,9 +585,8 @@ const AddToCard = () => {
                       </div>
                     </div>
                     <Button
-                      type="button"
+                      type="submit"
                       className="w-full rounded-full bg-appColor hover:bg-appColor/90 text-white"
-                      onClick={handleSubmit}
                     >
                       Update Item
                     </Button>
