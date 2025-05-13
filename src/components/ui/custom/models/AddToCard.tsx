@@ -237,7 +237,7 @@ const AddToCard = () => {
                 <button
                   onClick={() => {
                     dispatch(setIsAddToCart(false));
-                    dispatch(setIsCustomize(false));
+                    dispatch(setIsCustomize(true));
                   }}
                   className="absolute z-10 top-4 left-4 p-2 rounded-full border-[1.5px] border-white bg-transparent"
                 >
