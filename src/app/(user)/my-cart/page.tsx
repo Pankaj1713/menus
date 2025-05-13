@@ -64,8 +64,6 @@ export default function CartPage() {
     }
   };
 
-  console.log({ cartData });
-
   const totalItems =
     cartData?.items?.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const totalPrice =

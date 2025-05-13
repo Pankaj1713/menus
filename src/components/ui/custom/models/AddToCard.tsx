@@ -299,9 +299,20 @@ const AddToCard = () => {
 
               <div className="sticky bg-white  z-10 flex flex-col gap-2 bottom-0 left-0 right-0 p-1 rounded-xl">
                 <Button className="w-full h-12 rounded-full bg-appColor hover:bg-appColor/90 text-white">
-                  <ShoppingCart className="!w-6  !h-6" /> Add to Cart
+                  <ShoppingCart
+                    className="!w-6  !h-6"
+                    onClick={() => handleAddToCart(data)}
+                  />{" "}
+                  Add to Cart
                 </Button>
-                <Button variant="outline" className="w-full h-12 rounded-full">
+                <Button
+                  variant="outline"
+                  className="w-full h-12 rounded-full"
+                  onClick={() => {
+                    dispatch(setIsCustomize(true));
+                    dispatch(setIsAddToCart(false));
+                  }}
+                >
                   Customisable
                 </Button>
               </div>
