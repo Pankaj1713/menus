@@ -46,6 +46,7 @@ const AddToCard = () => {
   };
   const [loading, setLoading] = useState(true);
   const [deviceId, setDeviceId] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const id = modelsOpen?.modalId;
   const router = useRouter();
@@ -91,8 +92,6 @@ const AddToCard = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = async (data) => {
-    console.log({ data });
-
     const params = {
       tableNumber: "2",
       // image: data?.image,
@@ -106,7 +105,7 @@ const AddToCard = () => {
       addBeverages: data.addBeverages.map(({ _id, ...rest }) => rest),
       chooseYourSides: data.chooseYourSides.map(({ _id, ...rest }) => rest),
     };
-
+    setIsLoading(true);
     try {
       const res = await postApi(APIS.CART_DATA, params);
       // router.push("/my-cart");
@@ -118,6 +117,8 @@ const AddToCard = () => {
     } catch (error) {
       console.error({ error });
       toast.error(error?.response?.data?.data);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -305,12 +306,12 @@ const AddToCard = () => {
               </div>
 
               <div className="sticky bg-white  z-10 flex flex-col gap-2 bottom-0 left-0 right-0 p-1 rounded-xl">
-                <Button className="w-full h-12 rounded-full bg-appColor hover:bg-appColor/90 text-white">
-                  <ShoppingCart
-                    className="!w-6  !h-6"
-                    onClick={() => handleAddToCart(data)}
-                  />{" "}
-                  Add to Cart
+                <Button
+                  className="w-full h-12 rounded-full bg-appColor hover:bg-appColor/90 text-white"
+                  onClick={() => handleAddToCart(data)}
+                >
+                  <ShoppingCart className="!w-6  !h-6" />{" "}
+                  {isLoading ? "Adding..." : "Add to Cart"}
                 </Button>
                 <Button
                   variant="outline"
@@ -351,7 +352,7 @@ const AddToCard = () => {
                       className=" w-fit"
                       onClick={() => handleAddToCart(data)}
                     >
-                      Add to Cart
+                      {isLoading ? "Adding..." : "Add to Cart"}
                     </Button>
                     <Button
                       onClick={() => {
