@@ -46,12 +46,9 @@ export type AppDispatch = typeof store.dispatch;
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [loading, setLoading] = useState(false);
-  // const [cartData, setCartData] = useState<CartData | null>(null);
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
-  const currentPage = pathname.split("/")[1];
   const dispatch: AppDispatch = useDispatch();
   const cartData = useSelector(
     (state: RootState) => state.cart.data as CartData | null
@@ -73,33 +70,6 @@ const Header = () => {
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
-  };
-
-  // Add these animation variants
-  const menuVariants = {
-    closed: {
-      opacity: 0,
-      height: 0,
-    },
-    open: {
-      opacity: 1,
-      height: "auto",
-      transition: {
-        duration: 0.3,
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-      },
-    },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        duration: 0.3,
-        when: "afterChildren",
-        staggerChildren: 0.05,
-        staggerDirection: -1,
-      },
-    },
   };
 
   // Add these sidebar animation variants

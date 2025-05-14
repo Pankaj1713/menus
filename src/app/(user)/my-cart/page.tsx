@@ -164,7 +164,21 @@ type CartItemProps = {
 function CartItem({ item, onDelete, deviceId }: CartItemProps) {
   const [isCustomize, setIsCustomize] = useState(false);
   const [quantity, setQuantity] = useState(1);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
+
+  const [updatedItems, setUpdatedItems] = useState([]);
+
+  useEffect(() => {
+    if (!!data) {
+      setQuantity(data?.quantity);
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if (item?.items?.length > 0) {
+      setUpdatedItems(item?.items);
+    }
+  }, [item]);
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -176,7 +190,7 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
       name: data?.name,
       category: data?.category,
       price: data?.price,
-      quantity: data?.quantity,
+      quantity: quantity,
     };
 
     if (values.addOns && Array.isArray(values.addOns)) {
@@ -206,6 +220,7 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
       if (res?.statusCode === 200) {
         toast.success("Item added to cart");
         setIsCustomize(false);
+        dispatch(fetchCartData());
         onDelete(true);
       } else {
         console.error("API returned an error:", res);
@@ -234,9 +249,39 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
   const decreaseQuantity = () =>
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
+  const increase = (item) => {
+    const array = updatedItems?.map((i) => {
+      if (i?._id === item?._id) {
+        return {
+          ...i,
+          quantity: i.quantity + 1,
+        };
+      }
+      return i;
+    });
+    setUpdatedItems(array);
+  };
+
+  const decrease = (item) => {
+    const array = updatedItems?.map((i) => {
+      if (i?._id === item?._id) {
+        if (i.quantity > 1) {
+          return {
+            ...i,
+            quantity: i.quantity - 1,
+          };
+        } else {
+          return i;
+        }
+      }
+      return i;
+    });
+    setUpdatedItems(array);
+  };
+
   return (
     <div className="space-y-10">
-      {item?.items?.map((item, index) => {
+      {updatedItems?.map((item, index) => {
         return (
           <div className="bg-white rounded-3xl card-shadow p-4" key={index}>
             <div className="flex relative flex-col md:flex-row md:items-start gap-4">
@@ -283,6 +328,7 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
                   variant="outline"
                   size="icon"
                   className="h-8 rounded-full w-8"
+                  onClick={() => decrease(item)}
                 >
                   <Minus className="h-4 w-4" />
                 </Button>
@@ -293,8 +339,9 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
                   variant="outline"
                   size="icon"
                   className="h-8 rounded-full w-8"
+                  onClick={() => increase(item)}
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4" onClick={increaseQuantity} />
                 </Button>
               </div>
               <span className="font-semibold">
@@ -327,7 +374,7 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
           }}
           onSubmit={handleUpdateItem}
         >
-          {({ values, setFieldValue }) => {
+          {({ values, setFieldValue, isSubmitting }) => {
             return (
               <Form>
                 <div className="flex relative bg-white rounded-2xl card-shadow items-center gap-2 p-4">
@@ -528,7 +575,8 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
                       type="submit"
                       className="w-full rounded-full bg-appColor hover:bg-appColor/90 text-white"
                     >
-                      Update Item
+                      {/* Update Item */}
+                      {isSubmitting ? "Updating..." : "Update Item"}
                     </Button>
                   </div>
                 </div>

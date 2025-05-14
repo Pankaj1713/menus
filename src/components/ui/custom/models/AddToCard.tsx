@@ -91,26 +91,33 @@ const AddToCard = () => {
     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   const handleAddToCart = async (data) => {
+    console.log({ data });
+
     const params = {
       tableNumber: "2",
-      itemId: data?._id,
-      image: data?.image,
-      name: data?.name,
-      category: data?.category,
-      price: data?.price,
-      description: data?.description,
+      // image: data?.image,
+      // name: data?.name,
+      // category: data?.category,
+      // price: data?.price,
+      // description: data?.description,
       quantity: quantity,
-      addOns: values.addOns.map(({ _id, ...rest }) => rest),
-      addBeverages: values.addBeverages.map(({ _id, ...rest }) => rest),
-      chooseYourSides: values.chooseYourSides.map(({ _id, ...rest }) => rest),
+      deviceId: deviceId,
+      addOns: data.addOns.map(({ _id, ...rest }) => rest),
+      addBeverages: data.addBeverages.map(({ _id, ...rest }) => rest),
+      chooseYourSides: data.chooseYourSides.map(({ _id, ...rest }) => rest),
     };
 
     try {
-      dispatch(setIsAddToCart(false));
-      dispatch(setIsCustomize(false));
       const res = await postApi(APIS.CART_DATA, params);
+      // router.push("/my-cart");
+      if (res?.statusCode === 200) {
+        toast.success("Item added to cart");
+        dispatch(setIsAddToCart(false));
+        router.push("/my-cart");
+      }
     } catch (error) {
       console.error({ error });
+      toast.error(error?.response?.data?.data);
     }
   };
 
