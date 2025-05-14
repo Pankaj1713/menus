@@ -176,6 +176,7 @@ function CartItem({ item, onDelete, deviceId }: CartItemProps) {
 
   useEffect(() => {
     if (item?.items?.length > 0) {
+      console.log({ item });
       setUpdatedItems(item?.items);
     }
   }, [item]);
