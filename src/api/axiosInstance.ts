@@ -11,10 +11,10 @@ const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 axiosInstance.interceptors.request.use(
   (config) => {
-    const token = process.env.NEXT_PUBLIC_API_TOKEN;
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
+    // const token = process.env.NEXT_PUBLIC_API_TOKEN;
+    // if (token) {
+    //   config.headers["Authorization"] = `Bearer ${token}`;
+    // }
     config.headers["Timezone"] = timeZone;
     return config;
   },
